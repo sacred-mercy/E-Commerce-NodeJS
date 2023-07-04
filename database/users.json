@@ -1,1 +1,9 @@
-[{"name":"gaurav","mobile":"9368934077","email":"gaurav@gmail.com","password":"g"},{"name":"g","mobile":"1","email":"g@g.c","password":"g"}]
+[
+    {
+        "name": "gaurav",
+        "mobile": "9368934077",
+        "email": "gaurav@gmail.com",
+        "password": "g"
+    },
+    { "name": "g", "mobile": "1", "email": "g@g.c", "password": "g" }
+]

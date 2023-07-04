@@ -32,6 +32,12 @@
                             value=""
                         />
                     </div>
+
+                    <!-- display error message -->
+                    <% if (typeof errorMessage !== 'undefined') { %>
+                    <div class="text-red-500 mb-4 text-center"><%= errorMessage %></div>
+                    <% } %>
+
                     <div>
                         <button
                             type="submit"
@@ -43,7 +49,7 @@
                 </form>
                 <a href="/signUp"
                     >Don't have an account?
-                    <button class="border p-2">SignUp</button>
+                    <button class="border rounded p-2 bg-slate-200 font-bold">Register</button>
                 </a>
             </div>
         </div>

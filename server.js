@@ -21,25 +21,33 @@ app.get("/", (req, res) => res.render("index"));
 app.route("/login")
     .get((req, res) => res.render("login"))
     .post((req, res) => {
+        console.log(req.body);
         const { email, password } = req.body;
         fs.readFile("database/users.json", (err, data) => {
-            if (err) throw err;
+            if (err) {
+                res.render("login", {
+                    errorMessage: "Invalid email or password",
+                });
+                return;
+            }
             const users = JSON.parse(data);
             for (let user of users) {
                 if (user.email === email && user.password === password) {
                     req.session.name = user.name;
                     req.session.email = email;
                     res.redirect("/home");
+                    return;
                 }
             }
-            res.redirect("/login");
+            res.render("login", {
+                errorMessage: "Invalid email or password",
+            });
         });
     });
 
 app.route("/signUp")
     .get((req, res) => res.render("signUp"))
     .post((req, res) => {
-        console.log(req.body);
         const { name, mobile, email, password } = req.body;
         const user = {
             name: name,
@@ -47,15 +55,35 @@ app.route("/signUp")
             email: email,
             password: password,
         };
+        
         fs.readFile("database/users.json", (err, data) => {
-            if (err) throw err;
+            if (err) {
+                res.render("signUp", {
+                    errorMessage: "Invalid email or password",
+                });
+            }
             const users = JSON.parse(data);
+
+            // Check if user already exists
+            for (let user of users) {
+                if (user.email === email) {
+                    res.render("signUp", {
+                        errorMessage: "User already exists",
+                    });
+                    return;
+                }
+            }
+
             users.push(user);
             fs.writeFile(
                 "database/users.json",
                 JSON.stringify(users),
                 (err) => {
-                    if (err) throw err;
+                    if (err) {
+                        res.render("login", {
+                            errorMessage: "Invalid email or password",
+                        });
+                    }
                     console.log("Data written to file");
                     res.redirect("/login");
                 }
