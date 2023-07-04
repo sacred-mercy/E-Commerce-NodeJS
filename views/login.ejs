@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Login Page</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    </head>
+    <body>
+        <div class="constainer flex justify-center items-center h-screen">
+            <div>
+                <form action="/login" method="POST">
+                    <div class="mb-4">
+                        <label for="email" class="sr-only">Email</label>
+                        <input
+                            type="text"
+                            name="email"
+                            id="email"
+                            placeholder="Enter your email"
+                            class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
+                            value=""
+                        />
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="sr-only">Password</label>
+                        <input
+                            type="text"
+                            name="password"
+                            id="password"
+                            placeholder="Enter password"
+                            class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
+                            value=""
+                        />
+                    </div>
+                    <div>
+                        <button
+                            type="submit"
+                            class="bg-blue-500 text-white px-4 py-3 mb-3 rounded font-medium w-64"
+                        >
+                            Login
+                        </button>
+                    </div>
+                </form>
+                <a href="/signUp"
+                    >Don't have an account?
+                    <button class="border p-2">SignUp</button>
+                </a>
+            </div>
+        </div>
+    </body>
+</html>
