@@ -16,11 +16,21 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get("/", (req, res) => res.render("index"));
+app.get("/", (req, res) => {
+    if (req.session.isLoggedIn) {
+        res.render("index", { username: req.session.name });
+    } else {
+        res.render("index");
+    }
+});
 
 app.route("/login")
     .get((req, res) => res.render("login"))
     .post((req, res) => {
+        if (req.session.isLoggedIn) {
+            res.redirect("/");
+            return;
+        }
         console.log(req.body);
         const { email, password } = req.body;
         fs.readFile("database/users.json", (err, data) => {
@@ -33,9 +43,10 @@ app.route("/login")
             const users = JSON.parse(data);
             for (let user of users) {
                 if (user.email === email && user.password === password) {
+                    req.session.isLoggedIn = true;
                     req.session.name = user.name;
                     req.session.email = email;
-                    res.redirect("/home");
+                    res.redirect("/");
                     return;
                 }
             }
@@ -50,12 +61,13 @@ app.route("/signUp")
     .post((req, res) => {
         const { name, mobile, email, password } = req.body;
         const user = {
-            name: name,
-            mobile: mobile,
-            email: email,
-            password: password,
+            name,
+            mobile,
+            email,
+            password,
+            isEmailVerified: false,
         };
-        
+
         fs.readFile("database/users.json", (err, data) => {
             if (err) {
                 res.render("signUp", {
@@ -90,5 +102,22 @@ app.route("/signUp")
             );
         });
     });
+
+app.get("/logout", (req, res) => {
+    req.session.destroy();
+    res.redirect("/");
+});
+
+app.get("/products", (req, res) => {
+    fs.readFile("database/products.json", (err, data) => {
+        if (err) {
+            res.status(500).send("Internal Server Error");
+            return;
+        }
+        res.send(data);
+    });
+});
+
+app.route("*").get((req, res) => res.render("404"));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));

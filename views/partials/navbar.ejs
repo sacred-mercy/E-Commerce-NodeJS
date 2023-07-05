@@ -1,0 +1,21 @@
+<!-- navbar -->
+<nav class="flex justify-between bg-gray-900 text-white w-screen">
+    <div class="px-5 xl:px-12 py-6 flex w-full items-center">
+        <a class="text-3xl font-bold font-heading" href="/"> E-Commerce </a>
+        <!-- Nav Links -->
+        <ul
+            class="hidden md:flex px-4 mx-auto font-semibold font-heading space-x-12"
+        >
+            <li><a class="hover:text-gray-200" href="/">Home</a></li>
+        </ul>
+
+        <!-- Header profile menu -->
+        <% if (typeof username !== 'undefined' ) { %>
+            <p>Welcome <%= username %> </p>
+            <a href="/logout" class="text-white bg-red-600 border rounded p-1 mx-2 float-right hover:text-gray-200">Logout</a>
+        <% } else { %>
+            <a href="/login" class="text-white bg-green-600 border rounded p-1 hover:text-gray-200">Login</a>
+        <% } %>
+    </div>
+
+</nav>
