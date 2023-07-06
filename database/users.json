@@ -1,9 +1,12 @@
 [
     {
-        "name": "gaurav",
+        "name": "Gaurav",
         "mobile": "9368934077",
-        "email": "gaurav@gmail.com",
-        "password": "g"
-    },
-    { "name": "g", "mobile": "1", "email": "g@g.c", "password": "g" }
+        "email": "gauravnegi9634@gmail.com",
+        "password": "g",
+        "emailVerification": {
+            "isEmailVerified": true,
+            "verificationCode": 1688621790893
+        }
+    }
 ]
