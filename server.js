@@ -4,6 +4,8 @@ require("dotenv").config();
 const session = require("express-session");
 
 const sendEmail = require("./methods/sendEmail");
+const getUsers = require("./methods/getUsers");
+const setUsers = require("./methods/setUsers");
 
 const app = express();
 const port = process.env.PORT;
@@ -30,46 +32,39 @@ app.get("/", (req, res) => {
 
 app.route("/login")
     .get((req, res) => res.render("login"))
-    .post((req, res) => {
+    .post(async (req, res) => {
         if (req.session.isLoggedIn) {
             res.redirect("/");
             return;
         }
         console.log(req.body);
         const { email, password } = req.body;
-        fs.readFile("database/users.json", (err, data) => {
-            if (err) {
-                res.render("login", {
-                    errorMessage: "Invalid email or password",
-                });
-                return;
-            }
-            const users = JSON.parse(data);
-            for (let user of users) {
-                if (user.email === email && user.password === password) {
-                    // check if email is verified
-                    if (!user.emailVerification.isEmailVerified) {
-                        res.render("login", {
-                            errorMessage: "Email not verified",
-                        });
-                        return;
-                    }
-                    req.session.isLoggedIn = true;
-                    req.session.name = user.name;
-                    req.session.email = email;
-                    res.redirect("/");
+        const users = await getUsers();
+
+        for (let user of users) {
+            if (user.email === email && user.password === password) {
+                // check if email is verified
+                if (!user.emailVerification.isEmailVerified) {
+                    res.render("login", {
+                        errorMessage: "Email not verified",
+                    });
                     return;
                 }
+                req.session.isLoggedIn = true;
+                req.session.name = user.name;
+                req.session.email = email;
+                res.redirect("/");
+                return;
             }
-            res.render("login", {
-                errorMessage: "Invalid email or password",
-            });
+        }
+        res.render("login", {
+            errorMessage: "Invalid email or password",
         });
     });
 
 app.route("/signUp")
     .get((req, res) => res.render("signUp"))
-    .post((req, res) => {
+    .post(async (req, res) => {
         const { name, mobile, email, password } = req.body;
         const user = {
             name,
@@ -82,58 +77,32 @@ app.route("/signUp")
             },
         };
 
-        fs.readFile("database/users.json", (err, data) => {
-            if (err) {
+        const users = await getUsers();
+
+        // Check if user already exists
+        for (let user of users) {
+            if (user.email === email) {
                 res.render("signUp", {
-                    errorMessage: "Invalid email or password",
+                    errorMessage: "User already exists",
                 });
+                return;
             }
-            const users = JSON.parse(data);
+        }
+        users.push(user);
+        await setUsers(users);
+        res.sendFile(__dirname + "/public/verifyEmail.html");
 
-            // Check if user already exists
-            for (let user of users) {
-                if (user.email === email) {
-                    res.render("signUp", {
-                        errorMessage: "User already exists",
-                    });
-                    return;
-                }
-            }
-
-            // Send email verification link
-            const subject = "Email Verification";
-            const textPart = `Greetings from E-commerce.`;
-            const htmlPart =
-                "<h3>Please verify your email by clicking on the link below</h3>" +
-                '<br/><a href="http://localhost:' +
-                process.env.PORT +
-                "/verifyEmail?token=" +
-                token +
-                '">Verify</a>';
-            sendEmail(email, subject, textPart, htmlPart, (err, data) => {
-                if (err) {
-                    res.render("signUp", {
-                        errorMessage: "Invalid email or password",
-                    });
-                    return;
-                }
-                console.log(data);
-                users.push(user);
-                fs.writeFile(
-                    "database/users.json",
-                    JSON.stringify(users),
-                    (err) => {
-                        if (err) {
-                            res.render("login", {
-                                errorMessage: "Invalid email or password",
-                            });
-                        }
-                        console.log("Data written to file");
-                        res.redirect("/login");
-                    }
-                );
-            });
-        });
+        // Send email verification link
+        const subject = "Email Verification";
+        const textPart = `Greetings from E-commerce.`;
+        const htmlPart =
+            "<h3>Please verify your email by clicking on the link below</h3>" +
+            '<br/><a href="http://localhost:' +
+            process.env.PORT +
+            "/verifyEmail?token=" +
+            token +
+            '">Verify</a>';
+        // sendEmail(email, subject, textPart, htmlPart);
     });
 
 app.get("/logout", (req, res) => {
@@ -151,40 +120,27 @@ app.get("/products", (req, res) => {
     });
 });
 
-app.get("/verifyEmail", (req, res) => {
+app.get("/verifyEmail", async (req, res) => {
     const token = req.query.token;
     console.log(token);
-    fs.readFile("database/users.json", (err, data) => {
-        if (err) {
-            res.status(500).send("Internal Server Error");
+
+    const users = await getUsers();
+
+    for (let user of users) {
+        if (
+            user.emailVerification.verificationCode === token &&
+            !user.emailVerification.isEmailVerified
+        ) {
+            user.emailVerification.isEmailVerified = true;
+            await setUsers(users);
+            req.session.isLoggedIn = true;
+            req.session.name = user.name;
+            req.session.email = user.email;
+            res.redirect("/");
             return;
         }
-        const users = JSON.parse(data);
-        for (let user of users) {
-            if (
-                user.emailVerification.verificationCode.toString() === token &&
-                !user.emailVerification.isEmailVerified
-            ) {
-                user.emailVerification.isEmailVerified = true;
-                fs.writeFile(
-                    "database/users.json",
-                    JSON.stringify(users),
-                    (err) => {
-                        if (err) {
-                            res.status(500).send("Internal Server Error");
-                            return;
-                        }
-                        req.session.isLoggedIn = true;
-                        req.session.name = user.name;
-                        req.session.email = user.email;
-                        res.redirect("/");
-                    }
-                );
-                return;
-            }
-        }
-        res.status(404).redirect("*");
-    });
+    }
+    res.status(404).redirect("*");
 });
 
 app.route("/changePassword")
@@ -195,7 +151,7 @@ app.route("/changePassword")
         }
         res.render("changePassword");
     })
-    .post((req, res) => {
+    .post(async (req, res) => {
         const { newPassword, confirmPassword } = req.body;
         if (newPassword !== confirmPassword) {
             res.render("changePassword", {
@@ -203,47 +159,111 @@ app.route("/changePassword")
             });
             return;
         }
-        fs.readFile("database/users.json", (err, data) => {
-            if (err) {
-                res.status(500).send("Internal Server Error");
-                return;
-            }
-            const users = JSON.parse(data);
-            for (let user of users) {
-                if (user.email === req.session.email) {
-                    if (user.password === newPassword) {
-                        res.render("changePassword", {
-                            errorMessage: "New password cannot be same",
-                        });
-                        return;
-                    }
-                    user.password = newPassword;
-                    fs.writeFile(
-                        "database/users.json",
-                        JSON.stringify(users),
-                        (err) => {
-                            if (err) {
-                                res.status(500).send("Internal Server Error");
-                                return;
-                            }
-                            res.redirect("/logout");
-                            // send a email to user that password has been changed
-                            sendEmail(
-                                user.email,
-                                "Password Changed",
-                                "You have just changed your Password",
-                                ""
-                            );
-                        }
-                    );
+
+        const users = await getUsers();
+        for (let user of users) {
+            if (user.email === req.session.email) {
+                if (user.password === newPassword) {
+                    res.render("changePassword", {
+                        errorMessage: "New password cannot be same",
+                    });
                     return;
                 }
+                user.password = newPassword;
+                await setUsers(users);
+                res.redirect("/logout");
+                // send a email to user that password has been changed
+                // sendEmail(
+                //     user.email,
+                //     "Password Changed",
+                //     "You have just changed your Password",
+                //     ""
+                // );
+                return;
             }
-        });
+        }
     });
 
 app.route("/forgotPassword")
     .get((req, res) => res.render("forgotPassword"))
+    .post(async (req, res) => {
+        const { email } = req.body;
+
+        const users = await getUsers();
+        for (let user of users) {
+            if (user.email === email) {
+                const subject = "Password Reset";
+                const textPart = `Greetings from E-commerce.`;
+                const htmlPart =
+                    "<h3>Please reset your password by clicking on the link below</h3>" +
+                    '<br/><a href="http://localhost:' +
+                    process.env.PORT +
+                    "/resetPassword?token=" +
+                    user.emailVerification.verificationCode +
+                    '">Reset Password</a>';
+
+                res.render("forgotPassword", {
+                    errorMessage: "Password reset link sent to your email",
+                });
+
+                // sendEmail(email, subject, textPart, htmlPart);
+                return;
+            }
+        }
+        res.render("forgotPassword", {
+            errorMessage: "User does not exist",
+        });
+    });
+
+app.route("/resetPassword")
+    .get(async (req, res) => {
+        const token = req.query.token;
+
+        const users = await getUsers();
+        for (let user of users) {
+            if (
+                user.emailVerification.verificationCode.toString() === token &&
+                user.emailVerification.isEmailVerified
+            ) {
+                req.session.email = user.email;
+                res.render("resetPassword");
+                return;
+            }
+        }
+        res.status(404).redirect("*");
+    })
+    .post(async (req, res) => {
+        const { newPassword, confirmPassword } = req.body;
+        if (newPassword !== confirmPassword) {
+            res.render("resetPassword", {
+                errorMessage: "Confirm password do not match",
+            });
+            return;
+        }
+
+        const users = await getUsers();
+        for (let user of users) {
+            if (user.email === req.session.email) {
+                if (user.password === newPassword) {
+                    res.render("resetPassword", {
+                        errorMessage: "New password cannot be same",
+                    });
+                    return;
+                }
+                user.password = newPassword;
+                await setUsers(users);
+                res.redirect("/logout");
+                // send a email to user that password has been changed
+                // sendEmail(
+                //     user.email,
+                //     "Password Changed",
+                //     "You have just changed your Password",
+                //     ""
+                // );
+                return;
+            }
+        }
+    });
 
 app.route("*").get((req, res) => res.sendFile(__dirname + "/public/404.html"));
 
