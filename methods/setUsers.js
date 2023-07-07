@@ -1,13 +1,36 @@
-let fs = require("fs");
-let fileName = "database/users.json";
+let db = require("./db.js");
 
-function setUsers(data){
+function addUser(userDetail) {
     return new Promise((resolve, reject) => {
-        fs.writeFile(fileName, JSON.stringify(data), function (err) {
-            if (err) reject(err);
-            resolve("Success");
-        });
-    } );
+        db(
+            `INSERT INTO users (name, email, password, mobile, isVerified, verificationCode)`+ 
+            `VALUES ('${userDetail.name}', '${userDetail.email}', '${userDetail.password}',`+
+            `'${userDetail.mobile}', '${userDetail.emailVerification.isEmailVerified}',`+
+            `'${userDetail.emailVerification.verificationCode}')`
+        )
+            .then((result) => {
+                resolve(result);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
 }
 
-module.exports = setUsers;
+function setUser(userDetail) {
+    return new Promise((resolve, reject) => {
+        db(
+            `UPDATE users SET name='${userDetail.name}', password='${userDetail.password}',`+
+            `mobile='${userDetail.mobile}', isVerified='${userDetail.emailVerification.isEmailVerified}',`+
+            `verificationCode='${userDetail.emailVerification.verificationCode}' WHERE email='${userDetail.email}'`
+        )
+            .then((result) => {
+                resolve(result);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+module.exports = { addUser, setUser };

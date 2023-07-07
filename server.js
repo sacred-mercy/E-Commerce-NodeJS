@@ -4,8 +4,9 @@ require("dotenv").config();
 const session = require("express-session");
 
 const sendEmail = require("./methods/sendEmail");
-const getUsers = require("./methods/getUsers");
-const setUsers = require("./methods/setUsers");
+const { getUsers, getUser, checkUser } = require("./methods/getUsers");
+const { addUser, setUser } = require("./methods/setUsers");
+const e = require("express");
 
 const app = express();
 const port = process.env.PORT;
@@ -39,9 +40,8 @@ app.route("/login")
         }
         console.log(req.body);
         const { email, password } = req.body;
-        const users = await getUsers();
-
-        for (let user of users) {
+        const user = await getUser(email, password);
+        if (user.length !== 0) {
             if (user.email === email && user.password === password) {
                 // check if email is verified
                 if (!user.emailVerification.isEmailVerified) {
@@ -56,10 +56,11 @@ app.route("/login")
                 res.redirect("/");
                 return;
             }
+        } else {
+            res.render("login", {
+                errorMessage: "Invalid email or password",
+            });
         }
-        res.render("login", {
-            errorMessage: "Invalid email or password",
-        });
     });
 
 app.route("/signUp")
@@ -77,19 +78,16 @@ app.route("/signUp")
             },
         };
 
-        const users = await getUsers();
-
         // Check if user already exists
-        for (let user of users) {
-            if (user.email === email) {
-                res.render("signUp", {
-                    errorMessage: "User already exists",
-                });
-                return;
-            }
+        const userExist = await checkUser(email);
+        if (userExist) {
+            res.render("signUp", {
+                errorMessage: "User already exists",
+            });
+            return;
         }
-        users.push(user);
-        await setUsers(users);
+
+        await addUser(user);
         res.sendFile(__dirname + "/public/verifyEmail.html");
 
         // Send email verification link
@@ -100,7 +98,7 @@ app.route("/signUp")
             '<br/><a href="http://localhost:' +
             process.env.PORT +
             "/verifyEmail?token=" +
-            token +
+            user.emailVerification.verificationCode +
             '">Verify</a>';
         // sendEmail(email, subject, textPart, htmlPart);
     });

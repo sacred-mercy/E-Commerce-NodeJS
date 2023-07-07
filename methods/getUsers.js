@@ -1,17 +1,68 @@
-// a module to get users from the database
-// Parameters: none
-// Returns: a  json object with all the users
-// Dependencies: none
-let fs = require("fs");
-let fileName = "database/users.json";
+let db = require("./db.js");
 
-function getUsers() {
+function getUser(email, password) {
     return new Promise((resolve, reject) => {
-        fs.readFile(fileName, "utf8", function (err, data) {
-            if (err) reject(err);
-            resolve(JSON.parse(data));
-        });
+        db("SELECT * FROM users WHERE email='" + email + "' AND password='" + password + "'")
+            .then((result) => {
+                let user = {
+                    name: result[0].name,
+                    email: result[0].email,
+                    password: result[0].password,
+                    mobile: result[0].mobile,
+                    emailVerification: {
+                        isEmailVerified: result[0].isVerified,
+                        verificationCode: result[0].verificationCode,
+                    },
+                };
+                resolve(user);
+            })
+            .catch((err) => {
+                reject(err);
+            });
     });
 }
 
-module.exports = getUsers;
+function checkUser(email) {
+    return new Promise((resolve, reject) => {
+        db("SELECT * FROM users WHERE email='" + email + "'")
+
+            .then((result) => {
+                if (result.length == 0) {
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+function getUsers() {
+    return new Promise((resolve, reject) => {
+        db("SELECT * FROM users")
+            .then((result) => {
+                let users = [];
+                for (let i = 0; i < result.length; i++) {
+                    let user = {
+                        name: result[i].name,
+                        email: result[i].email,
+                        password: result[i].password,
+                        mobile: result[i].mobile,
+                        emailVerification: {
+                            isEmailVerified: result[i].isVerified,
+                            verificationCode: result[i].verificationCode,
+                        },
+                    };
+                    users.push(user);
+                }
+                resolve(users);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+module.exports = { getUser, getUsers, checkUser };
