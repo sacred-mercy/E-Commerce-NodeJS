@@ -19,6 +19,7 @@
                             placeholder="Enter your email"
                             class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
                             value=""
+                            required
                         />
                     </div>
                     <div class="mb-4">
@@ -30,17 +31,22 @@
                             placeholder="Enter password"
                             class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
                             value=""
+                            required
                         />
                     </div>
 
                     <!-- display error message -->
                     <% if (typeof errorMessage !== 'undefined') { %>
-                    <div class="text-red-500 mb-4 text-center"><%= errorMessage %></div>
+                    <div class="text-red-500 mb-4 text-center">
+                        <%= errorMessage %>
+                    </div>
                     <% } %>
 
                     <!-- Forget Password link -->
                     <div class="mb-4">
-                        <a href="/forgotPassword" class="text-blue-500">Forget Password?</a>
+                        <a href="/forgotPassword" class="text-blue-500"
+                            >Forget Password?</a
+                        >
                     </div>
 
                     <div>
@@ -54,7 +60,9 @@
                 </form>
                 <a href="/signUp"
                     >Don't have an account?
-                    <button class="border rounded p-2 bg-slate-200 font-bold">Register</button>
+                    <button class="border rounded p-2 bg-slate-200 font-bold">
+                        Register
+                    </button>
                 </a>
             </div>
         </div>

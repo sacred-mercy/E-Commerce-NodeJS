@@ -19,6 +19,7 @@
                             placeholder="Enter your name"
                             class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
                             value=""
+                            required
                         />
                     </div>
                     <div class="mb-4">
@@ -30,6 +31,7 @@
                             placeholder="Enter your email"
                             class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
                             value=""
+                            required
                         />
                     </div>
                     <div class="mb-4">
@@ -41,6 +43,7 @@
                             placeholder="Enter your mobile number"
                             class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
                             value=""
+                            required
                         />
                     </div>
                     <div class="mb-4">
@@ -52,12 +55,15 @@
                             placeholder="Enter password"
                             class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
                             value=""
+                            required
                         />
                     </div>
 
                     <!-- display error message -->
                     <% if (typeof errorMessage !== 'undefined') { %>
-                    <div class="text-red-500 mb-4 text-center"><%= errorMessage %></div>
+                    <div class="text-red-500 mb-4 text-center">
+                        <%= errorMessage %>
+                    </div>
                     <% } %>
 
                     <div>

@@ -2,8 +2,17 @@ let db = require("./db.js");
 
 function getUser(email, password) {
     return new Promise((resolve, reject) => {
-        db("SELECT * FROM users WHERE email='" + email + "' AND password='" + password + "'")
+        db(
+            "SELECT * FROM users WHERE email='" +
+                email +
+                "' AND password='" +
+                password +
+                "'"
+        )
             .then((result) => {
+                if (result.length == 0) {
+                    resolve([]);
+                }
                 let user = {
                     name: result[0].name,
                     email: result[0].email,
@@ -25,7 +34,6 @@ function getUser(email, password) {
 function checkUser(email) {
     return new Promise((resolve, reject) => {
         db("SELECT * FROM users WHERE email='" + email + "'")
-
             .then((result) => {
                 if (result.length == 0) {
                     resolve(false);
@@ -65,4 +73,29 @@ function getUsers() {
     });
 }
 
-module.exports = { getUser, getUsers, checkUser };
+function getUserByEmail(email) {
+    return new Promise((resolve, reject) => {
+        db("SELECT * FROM users WHERE email='" + email + "'")
+            .then((result) => {
+                if (result.length == 0) {
+                    resolve([]);
+                }
+                let user = {
+                    name: result[0].name,
+                    email: result[0].email,
+                    password: result[0].password,
+                    mobile: result[0].mobile,
+                    emailVerification: {
+                        isEmailVerified: result[0].isVerified,
+                        verificationCode: result[0].verificationCode,
+                    },
+                };
+                resolve(user);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+module.exports = { getUser, getUsers, checkUser, getUserByEmail };
