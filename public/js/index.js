@@ -2,21 +2,22 @@ let productCardTemplate = document.getElementById("productCard");
 productCardTemplate.remove();
 
 let currentIndex = 0;
+const productObject = [];
 
-// fetch products.json from database folder using ajax
+// fetch first 5 products from database folder using ajax
 let productsData;
 let xhr = new XMLHttpRequest();
-xhr.open("GET", "/products");
-xhr.send();
+xhr.open("POST", "/products", true);
+xhr.setRequestHeader("Content-Type", "application/json");
+xhr.send(JSON.stringify({ from: currentIndex }));
 xhr.onload = () => {
     if (xhr.status === 200) {
         productsData = JSON.parse(xhr.response);
-        console.log(productsData);
-        loadProducts(productsData.slice(0, 5));
-        if (productsData.length <= 5) {
-            document.getElementById("loadMore").classList.add("hidden");
+        loadProducts(productsData.products);
+        if (productsData.numberOfProducts - currentIndex === 0) {
+            document.getElementById("LoadMoreBtn").classList.add("hidden");
         }
-        if (productsData.length === 0) {
+        if (productsData.numberOfProducts === 0) {
             document.getElementById("productsContainer").innerText =
                 "No products found";
         } else {
@@ -25,10 +26,12 @@ xhr.onload = () => {
     }
 };
 
+
 function loadProducts(products) {
     let productsContainer = document.getElementById("productsContainer");
     currentIndex += products.length;
     for (let product of products) {
+        productObject.push(product);
         let productCard = productCardTemplate.cloneNode(true);
         productCard.id = product.id;
         productCard.querySelector("#productImage").src = product.thumbnail;
@@ -36,27 +39,32 @@ function loadProducts(products) {
         productCard.classList.remove("hidden");
         productsContainer.appendChild(productCard);
     }
+    console.log("current index: " + currentIndex);
 }
 
 function loadMore() {
-    console.log(currentIndex);
-    let products = productsData.slice(currentIndex, currentIndex + 5);
-    loadProducts(products);
-    if (currentIndex >= productsData.length) {
-        document.getElementById("LoadMoreBtn").classList.add("hidden");
-    }
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "/products", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.send(JSON.stringify({ from: currentIndex }));
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+                productsData = JSON.parse(xhr.response);
+                loadProducts(productsData.products);
+                if (productsData.numberOfProducts - currentIndex === 0) {
+                    document
+                        .getElementById("LoadMoreBtn")
+                        .classList.add("hidden");
+                }
+            }
+        };
 }
 
 function showDialog(button) {
     // find the nearest card to the button
     let card = button.closest(".card");
-    let id = card.id;
-    showModal(parseInt(id));
-}
-
-function showModal(id) {
-    console.log(id);
-    for (let product of productsData) {
+    let id = parseInt(card.id);
+    for (let product of productObject) {
         if (product.id === id) {
             console.log(product);
             let dialog = document.getElementById("dialog");
@@ -73,6 +81,11 @@ function showModal(id) {
             break;
         }
     }
+}
+
+function showModal(id) {
+    console.log(id);
+    
 }
 
 function addToCart(button) {

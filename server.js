@@ -11,7 +11,7 @@ const {
     getUserByEmail,
 } = require("./methods/getUsers");
 const { addUser, setUser } = require("./methods/setUsers");
-const { getProducts } = require("./methods/getProducts");
+const { getProducts, getNumberOfProducts } = require("./methods/getProducts");
 const generateToken = require("./methods/generateToken");
 
 const app = express();
@@ -145,9 +145,12 @@ app.get("/logout", (req, res) => {
     res.redirect("/");
 });
 
-app.get("/products", async (req, res) => {
-    const products = await getProducts();
-    res.send(products);
+app.post("/products", async (req, res) => {
+    const { from } = req.body;
+    const products = await getProducts(from);
+    console.log(products);
+    const numberOfProducts = await getNumberOfProducts();
+    res.send({ products, numberOfProducts });
 });
 
 app.get("/verifyEmail", async (req, res) => {

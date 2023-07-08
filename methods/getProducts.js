@@ -1,8 +1,8 @@
 let db = require("./db.js");
 
-function getProducts() {
+function getProducts(from) {
     return new Promise((resolve, reject) => {
-        db("SELECT * FROM products")
+        db(`SELECT * FROM products LIMIT ${from},5`)
             .then((result) => {
                 let products = [];
                 for (let i = 0; i < result.length; i++) {
@@ -24,4 +24,16 @@ function getProducts() {
     });
 }
 
-module.exports = { getProducts };
+function getNumberOfProducts() {
+    return new Promise((resolve, reject) => {
+        db(`SELECT COUNT(*) AS count FROM products`)
+            .then((result) => {
+                resolve(result[0].count);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+module.exports = { getProducts, getNumberOfProducts };
