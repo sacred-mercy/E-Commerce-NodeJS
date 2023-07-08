@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const session = require("express-session");
 
+// Import methods.
 const sendEmail = require("./methods/sendEmail");
 const {
     getUsers,
@@ -16,8 +17,13 @@ const generateToken = require("./methods/generateToken");
 const app = express();
 const port = process.env.PORT;
 
+// Set the view engine to ejs
 app.set("view engine", "ejs");
+
+// Serve static assets (CSS, images, etc.) from the "public" folder.
 app.use(express.static("public"));
+
+// Use sessions to keep track of the user's login status.
 app.use(
     session({
         secret: "secret key",
@@ -25,6 +31,8 @@ app.use(
         saveUninitialized: false,
     })
 );
+
+// Parse incoming form submissions.
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
@@ -46,12 +54,16 @@ app.route("/login")
     })
     .post(async (req, res) => {
         const { email, password } = req.body;
+
+        // Check whether email and password are entered
         if (!email || !password) {
             res.render("login", {
                 errorMessage: "Please enter email and password",
             });
             return;
         }
+
+        // Check whether user exists
         const user = await getUser(email, password);
         if (user.length !== 0) {
             if (user.email === email && user.password === password) {
@@ -104,8 +116,8 @@ app.route("/signUp")
         };
 
         // Check if user already exists
-        const userExist = await checkUser(email);
-        if (userExist) {
+        const userExists = await checkUser(email);
+        if (userExists) {
             res.render("signUp", {
                 errorMessage: "User already exists",
             });
@@ -121,7 +133,7 @@ app.route("/signUp")
         const htmlPart =
             "<h3>Please verify your email by clicking on the link below</h3>" +
             '<br/><a href="http://localhost:' +
-            process.env.PORT +
+            port +
             "/verifyEmail?token=" +
             user.emailVerification.verificationCode +
             '">Verify</a>';
@@ -142,32 +154,41 @@ app.get("/verifyEmail", async (req, res) => {
     const token = req.query.token;
     console.log(token);
 
+    // if user is logged in, redirect to home page
     if (req.session.isLoggedIn) {
         res.redirect("/");
         return;
     }
 
+    // if token is not given, redirect to 404 page
     if (!token) {
         res.status(404).redirect("*");
         return;
     }
 
+    // get all users
     const users = await getUsers();
-
     for (let user of users) {
+        // if user's verification code matches the token and user's email is not verified
         if (
             user.emailVerification.verificationCode === token &&
             !user.emailVerification.isEmailVerified
         ) {
+            // mark user's email as verified
             user.emailVerification.isEmailVerified = 1;
             await setUser(user);
+
+            // set session variables
             req.session.isLoggedIn = true;
             req.session.name = user.name;
             req.session.email = user.email;
+
+            // redirect to home page
             res.redirect("/");
             return;
         }
     }
+    // if user is not found, redirect to 404 page
     res.status(404).redirect("*");
 });
 
@@ -250,7 +271,7 @@ app.route("/forgotPassword")
             const htmlPart =
                 "<h3>Please reset your password by clicking on the link below</h3>" +
                 '<br/><a href="http://localhost:' +
-                process.env.PORT +
+                port +
                 "/resetPassword?token=" +
                 user.emailVerification.verificationCode +
                 '">Reset Password</a>';

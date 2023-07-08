@@ -75,12 +75,8 @@ function showModal(id) {
     }
 }
 
-// window.addEventListener("click", function (event) {
-//     console.log(event.target);
-//     if (
-//         !window.dialog.contains(event.target) &&
-//         event.currentTarget === window
-//     ) {
-//         // window.dialog.close();
-//     }
-// });
+function addToCart(button) {
+    let card = button.closest(".card");
+    let id = card.id;
+    console.log(id);
+}
