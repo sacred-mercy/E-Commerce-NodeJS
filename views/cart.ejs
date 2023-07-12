@@ -9,16 +9,15 @@
     <body>
         <%-include('partials/navbar', {username: username}) %>
         <h1 class="text-2xl font-semibold flex justify-center">Cart</h1>
-        <div
-            id="emptyCart"
-            class="flex justify-center items-center h-96 hidden"
-        >
-            <h1 class="text-2xl font-semibold">Your cart is empty</h1>
-            <a
-                href="/"
-                class="text-white bg-blue-700 hover:bg-blue-800 mx-3 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-                >Go to shop</a
-            >
+        <div id="emptyCart" class="hidden">
+            <div class="flex justify-center items-center h-96">
+                <h1 class="text-2xl font-semibold">Your cart is empty</h1>
+                <a
+                    href="/"
+                    class="text-white bg-blue-700 hover:bg-blue-800 mx-3 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                    >Go to shop</a
+                >
+            </div>
         </div>
         <div class="flex justify-center">
             <div
@@ -139,7 +138,7 @@
                 </div>
             </section>
         </dialog>
-        
+
         <script src="js/cart.js"></script>
     </body>
 </html>
