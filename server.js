@@ -2,6 +2,9 @@ const express = require("express");
 require("dotenv").config();
 const session = require("express-session");
 
+// Import routes
+const cartRoutes = require("./routes/cart");
+
 // Import methods.
 const sendEmail = require("./methods/sendEmail");
 const {
@@ -36,9 +39,15 @@ app.use(
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Use routes
+app.use(cartRoutes);
+
 app.get("/", (req, res) => {
     if (req.session.isLoggedIn) {
-        res.render("index", { username: req.session.name });
+        res.render("index", {
+            username: req.session.name,
+            email: req.session.email,
+        });
     } else {
         res.render("index");
     }
@@ -148,7 +157,6 @@ app.get("/logout", (req, res) => {
 app.post("/products", async (req, res) => {
     const { from } = req.body;
     const products = await getProducts(from);
-    console.log(products);
     const numberOfProducts = await getNumberOfProducts();
     res.send({ products, numberOfProducts });
 });

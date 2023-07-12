@@ -26,7 +26,6 @@ xhr.onload = () => {
     }
 };
 
-
 function loadProducts(products) {
     let productsContainer = document.getElementById("productsContainer");
     currentIndex += products.length;
@@ -36,6 +35,7 @@ function loadProducts(products) {
         productCard.id = product.id;
         productCard.querySelector("#productImage").src = product.thumbnail;
         productCard.querySelector("#productName").innerText = product.title;
+        // productCard.querySelector(".addToCartClass").innerText = ;
         productCard.classList.remove("hidden");
         productsContainer.appendChild(productCard);
     }
@@ -43,21 +43,19 @@ function loadProducts(products) {
 }
 
 function loadMore() {
-        let xhr = new XMLHttpRequest();
-        xhr.open("POST", "/products", true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(JSON.stringify({ from: currentIndex }));
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                productsData = JSON.parse(xhr.response);
-                loadProducts(productsData.products);
-                if (productsData.numberOfProducts - currentIndex === 0) {
-                    document
-                        .getElementById("LoadMoreBtn")
-                        .classList.add("hidden");
-                }
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/products", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify({ from: currentIndex }));
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            productsData = JSON.parse(xhr.response);
+            loadProducts(productsData.products);
+            if (productsData.numberOfProducts - currentIndex === 0) {
+                document.getElementById("LoadMoreBtn").classList.add("hidden");
             }
-        };
+        }
+    };
 }
 
 function showDialog(button) {
@@ -83,13 +81,20 @@ function showDialog(button) {
     }
 }
 
-function showModal(id) {
-    console.log(id);
-    
-}
-
 function addToCart(button) {
     let card = button.closest(".card");
     let id = card.id;
-    console.log(id);
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "/addToCart", true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify({ id: id }));
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            if (xhr.response === "login") {
+                window.location.href = "/login";
+                return;
+            }
+            alert("Added to cart");
+        }
+    };
 }

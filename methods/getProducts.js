@@ -36,4 +36,24 @@ function getNumberOfProducts() {
     });
 }
 
-module.exports = { getProducts, getNumberOfProducts };
+function getProduct(id) {
+    return new Promise((resolve, reject) => {
+        db(`SELECT * FROM products WHERE id = ${id}`)
+            .then((result) => {
+                let product = {
+                    id: result[0].id,
+                    title: result[0].title,
+                    price: result[0].price,
+                    brand: result[0].brand,
+                    description: result[0].description,
+                    thumbnail: result[0].thumbnail,
+                };
+                resolve(product);
+            })
+            .catch((err) => {
+                reject(err);
+            });
+    });
+}
+
+module.exports = { getProducts, getNumberOfProducts, getProduct };
