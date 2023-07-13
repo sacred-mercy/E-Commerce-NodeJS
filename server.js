@@ -4,6 +4,8 @@ const session = require("express-session");
 
 // Import routes
 const cartRoutes = require("./routes/cart");
+const adminRoutes = require("./routes/admin");
+const apiRoutes = require("./routes/api");
 
 // Import methods.
 const sendEmail = require("./methods/sendEmail");
@@ -16,6 +18,7 @@ const {
 const { addUser, setUser } = require("./methods/setUsers");
 const { getProducts, getNumberOfProducts } = require("./methods/getProducts");
 const generateToken = require("./methods/generateToken");
+const checkAuth = require("./middleware/checkAuth");
 
 const app = express();
 const port = process.env.PORT;
@@ -37,10 +40,13 @@ app.use(
 
 // Parse incoming form submissions.
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static("uploads"));
 app.use(express.json());
 
 // Use routes
 app.use(cartRoutes);
+app.use("/admin", adminRoutes);
+app.use("/api", apiRoutes);
 
 app.get("/", (req, res) => {
     if (req.session.isLoggedIn) {
@@ -54,11 +60,7 @@ app.get("/", (req, res) => {
 });
 
 app.route("/login")
-    .get((req, res) => {
-        if (req.session.isLoggedIn) {
-            res.redirect("/");
-            return;
-        }
+    .get(checkAuth.checkLoggedOut, (req, res) => {
         res.render("login");
     })
     .post(async (req, res) => {
@@ -83,10 +85,16 @@ app.route("/login")
                     });
                     return;
                 }
+
                 req.session.isLoggedIn = true;
                 req.session.name = user.name;
                 req.session.email = email;
-                res.redirect("/");
+                if (user.isAdmin) {
+                    req.session.isAdmin = true;
+                    res.redirect("/admin");
+                } else {
+                    res.redirect("/");
+                }
                 return;
             }
         } else {
@@ -97,11 +105,7 @@ app.route("/login")
     });
 
 app.route("/signUp")
-    .get((req, res) => {
-        if (req.session.isLoggedIn) {
-            res.redirect("/");
-            return;
-        }
+    .get(checkAuth.checkLoggedOut, (req, res) => {
         res.render("signUp");
     })
     .post(async (req, res) => {
@@ -149,7 +153,7 @@ app.route("/signUp")
         // sendEmail(email, subject, textPart, htmlPart);
     });
 
-app.get("/logout", (req, res) => {
+app.get("/logout", checkAuth.checkLoggedIn, (req, res) => {
     req.session.destroy();
     res.redirect("/");
 });
@@ -161,15 +165,9 @@ app.post("/products", async (req, res) => {
     res.send({ products, numberOfProducts });
 });
 
-app.get("/verifyEmail", async (req, res) => {
+app.get("/verifyEmail", checkAuth.checkLoggedOut, async (req, res) => {
     const token = req.query.token;
     console.log(token);
-
-    // if user is logged in, redirect to home page
-    if (req.session.isLoggedIn) {
-        res.redirect("/");
-        return;
-    }
 
     // if token is not given, redirect to 404 page
     if (!token) {
@@ -204,11 +202,7 @@ app.get("/verifyEmail", async (req, res) => {
 });
 
 app.route("/changePassword")
-    .get((req, res) => {
-        if (!req.session.isLoggedIn) {
-            res.redirect("/login");
-            return;
-        }
+    .get(checkAuth.checkLoggedIn, (req, res) => {
         res.render("changePassword");
     })
     .post(async (req, res) => {
@@ -255,11 +249,7 @@ app.route("/changePassword")
     });
 
 app.route("/forgotPassword")
-    .get((req, res) => {
-        if (req.session.isLoggedIn) {
-            res.redirect("/");
-            return;
-        }
+    .get(checkAuth.checkLoggedOut, (req, res) => {
         res.render("forgotPassword");
     })
     .post(async (req, res) => {
@@ -296,15 +286,10 @@ app.route("/forgotPassword")
     });
 
 app.route("/resetPassword")
-    .get(async (req, res) => {
+    .get(checkAuth.checkLoggedOut, async (req, res) => {
         const token = req.query.token;
         if (!token) {
             res.status(404).redirect("*");
-            return;
-        }
-
-        if (req.session.isLoggedIn) {
-            res.redirect("/");
             return;
         }
 
@@ -365,4 +350,4 @@ app.route("/resetPassword")
 
 app.route("*").get((req, res) => res.sendFile(__dirname + "/public/404.html"));
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(port);

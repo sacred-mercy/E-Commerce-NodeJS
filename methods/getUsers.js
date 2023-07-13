@@ -22,6 +22,7 @@ function getUser(email, password) {
                         isEmailVerified: result[0].isVerified,
                         verificationCode: result[0].verificationCode,
                     },
+                    isAdmin: result[0].isAdmin,
                 };
                 resolve(user);
             })
@@ -62,6 +63,7 @@ function getUsers() {
                             isEmailVerified: result[i].isVerified,
                             verificationCode: result[i].verificationCode,
                         },
+                        isAdmin: result[i].isAdmin,
                     };
                     users.push(user);
                 }

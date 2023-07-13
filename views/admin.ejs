@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Admin Homepage</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    </head>
+    <body>
+        <% if(error) {%>
+            <div class="flex justify-center items-center h-screen">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-red-500">Not Authorized</h1>
+                    <a href="/" class="text-blue-500">Home Page</a>
+                </div>
+            </div>
+        <% } else { %>
+        <nav class="flex justify-between bg-gray-900 text-white w-screen">
+            <div class="px-5 xl:px-12 py-2 flex w-full items-center">
+                <a class="text-3xl font-bold font-heading" href="/">
+                    E-Commerce
+                </a>
+                <!-- Nav Links -->
+                <ul
+                    class="hidden md:flex px-4 mx-auto font-semibold font-heading space-x-12"
+                >
+                    <li>
+                        <a class="hover:text-gray-200" href="/admin">Home</a>
+                    </li>
+                </ul>
+
+                <!-- logout btn -->
+                <button>
+                    <a
+                        class="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                        href="/logout"
+                    >
+                        Logout
+                    </a>
+                </button>
+
+            </div>
+        </nav>
+
+        <div class="p-3 border-b">
+            <div id="AddProductDiv" class="flex justify-center w-screen">
+                <div>
+                    <table class="table-auto">
+                        <thead>
+                            <tr>
+                                <th colspan="2" class="text-2xl">
+                                    Add Product
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="my-2">
+                                <td>Product Name</td>
+                                <td>
+                                    <input
+                                        id="name"
+                                        class="form-input"
+                                        type="text"
+                                        name="name"
+                                        placeholder="Enter Product Name"
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Product Brand</td>
+                                <td>
+                                    <input
+                                        id="brand"
+                                        class="form-input"
+                                        type="text"
+                                        name="name"
+                                        placeholder="Enter Product Brand"
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Product Description</td>
+                                <td>
+                                    <input
+                                        id="description"
+                                        type="text"
+                                        name="description"
+                                        placeholder="Enter Product Description"
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Product Price</td>
+                                <td>
+                                    <input
+                                        id="price"
+                                        type="number"
+                                        name="price"
+                                        placeholder="Enter Product Price"
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Product Quantity</td>
+                                <td>
+                                    <input
+                                        id="quantity"
+                                        type="number"
+                                        name="quantity"
+                                        placeholder="Enter Product Quantity"
+                                    />
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>Product Image</td>
+                                <td>
+                                    <input
+                                        id="image"
+                                        type="file"
+                                        name="image"
+                                        placeholder="Enter Product Image"
+                                        accept="jpg, jpeg, png"
+                                        size="250000"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="flex justify-center mt-2">
+                        <button
+                            onclick="addProduct(this)"
+                            class="text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800"
+                        >
+                            Add Product
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <div
+                id="productsContainer"
+                class="p-3 grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            >
+                <div
+                    id="productCard"
+                    class="card hidden w-full max-w-sm m-1 bg-white border border-gray-200 rounded-lg shadow-lg dark:bg-gray-800 dark:border-gray-700"
+                >
+                    <img
+                        id="productImage"
+                        class="p-8 rounded h-48 w-full object-cover object-center"
+                        src=""
+                        alt="product image"
+                        loading="lazy"
+                    />
+
+                    <div class="px-5 pb-5">
+                        <table class="table-auto">
+                            <tbody>
+                                <tr class="my-2">
+                                    <td>Name</td>
+                                    <td>
+                                        <input
+                                            id="productName"
+                                            class="form-input"
+                                            type="text"
+                                            name="name"
+                                            placeholder="Enter Product Name"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr class="my-2">
+                                    <td>Brand</td>
+                                    <td>
+                                        <input
+                                            id="productBrand"
+                                            class="form-input"
+                                            type="text"
+                                            name="name"
+                                            placeholder="Enter Product Brand"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Description</td>
+                                    <td>
+                                        <textarea
+                                            id="productDescription"
+                                            type="text"
+                                            name="description"
+                                            placeholder="Enter Product Description"
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Price</td>
+                                    <td>
+                                        <input
+                                            id="productPrice"
+                                            type="number"
+                                            name="price"
+                                            placeholder="Enter Product Price"
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Quantity</td>
+                                    <td>
+                                        <input
+                                            id="productQuantity"
+                                            type="number"
+                                            name="quantity"
+                                            placeholder="Enter Product Quantity"
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="flex justify-evenly mt-1">
+                            <!-- Add to cart btn -->
+                            <button
+                                onclick="updateProduct(this)"
+                                class="addToCartClass text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:outline-none focus:ring-purple-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-800"
+                            >
+                                Update
+                            </button>
+                            <button
+                                onclick="deleteProduct(this)"
+                                class="text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-2.5 py-2.5 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="js/admin.js"></script>
+        <% } %>
+    </body>
+</html>
