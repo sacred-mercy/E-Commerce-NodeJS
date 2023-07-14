@@ -44,9 +44,9 @@ app.use(express.static("uploads"));
 app.use(express.json());
 
 // Use routes
-app.use(cartRoutes);
+app.use("/cart", cartRoutes);
 app.use("/admin", adminRoutes);
-app.use("/api", apiRoutes);
+app.use("/api", checkAuth.isAdmin, apiRoutes);
 
 app.get("/", (req, res) => {
     if (req.session.isLoggedIn) {

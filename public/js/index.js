@@ -87,12 +87,13 @@ function addToCart(button) {
     let card = button.closest(".card");
     let id = card.id;
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/addToCart", true);
+    xhr.open("POST", "/cart/addToCart", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify({ id: id }));
     xhr.onload = () => {
         if (xhr.status === 200) {
-            if (xhr.response === "login") {
+            console.log(xhr.response);
+            if (xhr.response === "notLoggedIn") {
                 window.location.href = "/login";
                 return;
             }

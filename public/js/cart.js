@@ -6,7 +6,7 @@ const productObject = [];
 // fetch cart items from database using ajax
 let cartItems;
 let xhr = new XMLHttpRequest();
-xhr.open("GET", "/getCart", true);
+xhr.open("GET", "/cart/getCart", true);
 xhr.send();
 xhr.onload = () => {
     if (xhr.status === 200) {
@@ -70,7 +70,7 @@ function changeQty(button, isIncrease) {
         return;
     }
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/changeCartQty", true);
+    xhr.open("POST", "/cart/changeCartQty", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(
         JSON.stringify({
@@ -93,7 +93,7 @@ function deleteProduct(button) {
     let productCard = button.parentElement.parentElement.parentElement;
     let id = productCard.id;
     let xhr = new XMLHttpRequest();
-    xhr.open("POST", "/deleteCartItem", true);
+    xhr.open("POST", "/cart/deleteCartItem", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(
         JSON.stringify({
