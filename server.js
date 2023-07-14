@@ -9,15 +9,12 @@ const apiRoutes = require("./routes/api");
 
 // Import methods.
 const sendEmail = require("./methods/sendEmail");
-const {
-    getUsers,
-    getUser,
-    checkUser,
-    getUserByEmail,
-} = require("./methods/getUsers");
+const getUsers = require("./methods/getUsers");
 const { addUser, setUser } = require("./methods/setUsers");
 const { getProducts, getNumberOfProducts } = require("./methods/getProducts");
 const generateToken = require("./methods/generateToken");
+
+// Import middleware
 const checkAuth = require("./middleware/checkAuth");
 
 const app = express();
@@ -26,8 +23,9 @@ const port = process.env.PORT;
 // Set the view engine to ejs
 app.set("view engine", "ejs");
 
-// Serve static assets (CSS, images, etc.) from the "public" folder.
+// Serve static assets
 app.use(express.static("public"));
+app.use(express.static("uploads"));
 
 // Use sessions to keep track of the user's login status.
 app.use(
@@ -40,7 +38,6 @@ app.use(
 
 // Parse incoming form submissions.
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static("uploads"));
 app.use(express.json());
 
 // Use routes
@@ -60,9 +57,7 @@ app.get("/", (req, res) => {
 });
 
 app.route("/login")
-    .get(checkAuth.checkLoggedOut, (req, res) => {
-        res.render("login");
-    })
+    .get(checkAuth.checkLoggedOut, (req, res) => res.render("login"))
     .post(async (req, res) => {
         const { email, password } = req.body;
 
@@ -75,7 +70,7 @@ app.route("/login")
         }
 
         // Check whether user exists
-        const user = await getUser(email, password);
+        const user = await getUsers.getUser(email, password);
         if (user.length !== 0) {
             if (user.email === email && user.password === password) {
                 // check if email is verified
@@ -105,11 +100,10 @@ app.route("/login")
     });
 
 app.route("/signUp")
-    .get(checkAuth.checkLoggedOut, (req, res) => {
-        res.render("signUp");
-    })
+    .get(checkAuth.checkLoggedOut, (req, res) => res.render("signUp"))
     .post(async (req, res) => {
         const { name, mobile, email, password } = req.body;
+
         if (!name || !mobile || !email || !password) {
             res.render("signUp", {
                 errorMessage: "Please enter all the fields",
@@ -129,7 +123,7 @@ app.route("/signUp")
         };
 
         // Check if user already exists
-        const userExists = await checkUser(email);
+        const userExists = await getUsers.checkUser(email);
         if (userExists) {
             res.render("signUp", {
                 errorMessage: "User already exists",
@@ -159,15 +153,13 @@ app.get("/logout", checkAuth.checkLoggedIn, (req, res) => {
 });
 
 app.post("/products", async (req, res) => {
-    const { from } = req.body;
-    const products = await getProducts(from);
+    const products = await getProducts(req.body.from);
     const numberOfProducts = await getNumberOfProducts();
     res.send({ products, numberOfProducts });
 });
 
 app.get("/verifyEmail", checkAuth.checkLoggedOut, async (req, res) => {
     const token = req.query.token;
-    console.log(token);
 
     // if token is not given, redirect to 404 page
     if (!token) {
@@ -176,7 +168,7 @@ app.get("/verifyEmail", checkAuth.checkLoggedOut, async (req, res) => {
     }
 
     // get all users
-    const users = await getUsers();
+    const users = await getUsers.getUsers();
     for (let user of users) {
         // if user's verification code matches the token and user's email is not verified
         if (
@@ -202,17 +194,18 @@ app.get("/verifyEmail", checkAuth.checkLoggedOut, async (req, res) => {
 });
 
 app.route("/changePassword")
-    .get(checkAuth.checkLoggedIn, (req, res) => {
-        res.render("changePassword");
-    })
+    .get(checkAuth.checkLoggedIn, (req, res) => res.render("changePassword"))
     .post(async (req, res) => {
+
         const { oldPassword, newPassword, confirmPassword } = req.body;
+
         if (!oldPassword || !newPassword || !confirmPassword) {
             res.render("changePassword", {
                 errorMessage: "Please enter all the fields",
             });
             return;
         }
+
         const email = req.session.email;
         if (newPassword !== confirmPassword) {
             res.render("changePassword", {
@@ -221,7 +214,7 @@ app.route("/changePassword")
             return;
         }
 
-        const user = await getUser(email, oldPassword);
+        const user = await getUsers.getUser(email, oldPassword);
         if (user.length === 0) {
             res.render("changePassword", {
                 errorMessage: "Invalid old password",
@@ -249,9 +242,7 @@ app.route("/changePassword")
     });
 
 app.route("/forgotPassword")
-    .get(checkAuth.checkLoggedOut, (req, res) => {
-        res.render("forgotPassword");
-    })
+    .get(checkAuth.checkLoggedOut, (req, res) => res.render("forgotPassword"))
     .post(async (req, res) => {
         const { email } = req.body;
         if (!email) {
@@ -261,7 +252,7 @@ app.route("/forgotPassword")
             return;
         }
 
-        const user = await getUserByEmail(email);
+        const user = await getUsers.getUserByEmail(email);
         if (user.length !== 0) {
             res.render("forgotPassword", {
                 errorMessage: "Password reset link sent to your email",
@@ -293,7 +284,7 @@ app.route("/resetPassword")
             return;
         }
 
-        const users = await getUsers();
+        const users = await getUsers.getUsers();
         for (let user of users) {
             if (
                 user.emailVerification.verificationCode.toString() === token &&
@@ -323,7 +314,7 @@ app.route("/resetPassword")
             return;
         }
 
-        const users = await getUsers();
+        const users = await getUsers.getUsers();
         for (let user of users) {
             if (user.email === req.session.email) {
                 if (user.password === newPassword) {
