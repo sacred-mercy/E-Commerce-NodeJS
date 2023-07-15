@@ -102,16 +102,17 @@ function deleteProduct(button) {
     );
     xhr.onload = () => {
         if (xhr.status === 200) {
+            
             productCard.remove();
+
             // delete from productObject
-            console.log(productObject, id);
             for (let i = 0; i < productObject.length; i++) {
                 if (productObject[i].id === parseInt(id)) {
                     productObject.splice(i, 1);
                     break;
                 }
             }
-            console.log(productObject);
+
             if (productObject.length === 0) {
                 document.getElementById("emptyCart").classList.remove("hidden");
             }

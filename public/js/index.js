@@ -40,7 +40,6 @@ function loadProducts(products) {
         productCard.classList.remove("hidden");
         productsContainer.appendChild(productCard);
     }
-    console.log("current index: " + currentIndex);
 }
 
 function loadMore() {
@@ -65,7 +64,6 @@ function showDialog(button) {
     let id = parseInt(card.id);
     for (let product of productObject) {
         if (product.id === id) {
-            console.log(product);
             let dialog = document.getElementById("dialog");
             dialog.querySelector("#productImageDialog").src =
                 "product/" + product.thumbnail;
@@ -92,12 +90,16 @@ function addToCart(button) {
     xhr.send(JSON.stringify({ id: id }));
     xhr.onload = () => {
         if (xhr.status === 200) {
-            console.log(xhr.response);
             if (xhr.response === "notLoggedIn") {
                 window.location.href = "/login";
                 return;
             }
-            alert("Added to cart");
+            if (xhr.response === "Out of stock") {
+                alert("Maximum quantity reached");
+                return;
+            }
+
+            alert(`Added to cart. Total quantity in cart: ${xhr.response}`);
         }
     };
 }

@@ -132,3 +132,5 @@ dist
 # test files
 test.js
 
+# intellij files
+.idea

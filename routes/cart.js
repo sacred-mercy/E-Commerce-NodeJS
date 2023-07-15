@@ -19,10 +19,15 @@ router.post("/addToCart", async (req, res) => {
     const cartItems = await cart.getCartItems(cartId);
     for (let item of cartItems) {
         if (parseInt(item.product_id) === parseInt(id)) {
-            await cart.changeQuantity(
+            let result = await cart.changeQuantity(
                 parseInt(item.id),
-                parseInt(item.qty) + 1
+                parseInt(item.qty) + 1,
+                parseInt(item.product_id)
             );
+            if (result === false) {
+                res.status(200).send("Out of stock");
+                return;
+            }
             let qty = parseInt(item.qty) + 1;
             qty = qty.toString();
             res.send(qty);
