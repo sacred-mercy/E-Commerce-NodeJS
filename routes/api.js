@@ -97,14 +97,8 @@ router
 			});
 
 		// delete this product from cart of all users
-		const sql2 = `DELETE FROM cart WHERE product_id = ${id}`;
-		db(sql2)
-			.then((result) => {
-				console.log(result);
-			})
-			.catch((err) => {
-				console.log(err);
-			});
+		const sql2 = `DELETE FROM cart_details WHERE product_id = ${id}`;
+		db(sql2);
 	});
 
 module.exports = router;
