@@ -28,11 +28,11 @@ module.exports = (email, subject, textPart, htmlPart, callback) => {
     request
         .then((result) => {
             console.log(result.body);
-            callback(null, result.body);
+            // callback(null, result.body);
         })
         .catch((err) => {
             console.log(err.statusCode);
             console.log(err.originalMessage);
-            callback(err, null);
+            // callback(err, null);
         });
 };

@@ -122,7 +122,7 @@ function addProduct() {
 			productCard.querySelector("#productQuantity").value = stock;
 			productCard.querySelector("#productImage").src =
 				"product/" + responseData.thumbnail;
-			productCardContainer.appendChild(productCard);
+			productCardContainer.prepend(productCard);
 
 			// Clear the form
 			document.querySelector("#name").value = "";

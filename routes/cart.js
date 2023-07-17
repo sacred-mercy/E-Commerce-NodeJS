@@ -53,6 +53,9 @@ router.get("/getCart", async (req, res) => {
     let products = [];
     for (let item of cartItems) {
         let product = await getProduct(item.product_id);
+        if (product === false) {
+            continue;
+        }
         product.qty = item.qty;
         products.push(product);
     }

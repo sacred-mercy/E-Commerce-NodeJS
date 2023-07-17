@@ -1,70 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Login Page</title>
-        <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
-    </head>
-    <body>
-        <div class="constainer flex justify-center items-center h-screen">
-            <div>
-                <form action="/login" method="POST">
-                    <div class="mb-4">
-                        <label for="email" class="sr-only">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            placeholder="Enter your email"
-                            class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
-                            value=""
-                            required
-                        />
-                    </div>
-                    <div class="mb-4">
-                        <label for="password" class="sr-only">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            id="password"
-                            placeholder="Enter password"
-                            class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
-                            value=""
-                            required
-                        />
-                    </div>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Login Page</title>
+		<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+	</head>
+	<body>
+		<div class="constainer flex justify-center items-center h-screen">
+			<div>
+				<form action="/login" method="POST">
+					<div class="mb-4">
+						<label for="email" class="sr-only">Email</label>
+						<input
+							type="email"
+							name="email"
+							id="email"
+							placeholder="Enter your email"
+							class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
+							value="" />
+					</div>
+					<div class="mb-4">
+						<label for="password" class="sr-only">Password</label>
+						<input
+							type="password"
+							name="password"
+							id="password"
+							placeholder="Enter password"
+							class="bg-gray-100 border-2 w-64 p-4 rounded-lg"
+							value="" />
+					</div>
 
-                    <!-- display error message -->
-                    <% if (typeof errorMessage !== 'undefined') { %>
-                    <div class="text-red-500 mb-4 text-center">
-                        <%= errorMessage %>
-                    </div>
-                    <% } %>
+					<!-- display error message -->
+					<% if (typeof errorMessage !== 'undefined') { %>
+					<div class="text-red-500 mb-4 text-center"><%= errorMessage %></div>
+					<% } %>
 
-                    <!-- Forget Password link -->
-                    <div class="mb-4">
-                        <a href="/forgotPassword" class="text-blue-500"
-                            >Forget Password?</a
-                        >
-                    </div>
+					<div id="errorDisplay" class="text-red-500 mb-4 text-center"></div>
 
-                    <div>
-                        <button
-                            type="submit"
-                            class="bg-blue-500 text-white px-4 py-3 mb-3 rounded font-medium w-64"
-                        >
-                            Login
-                        </button>
-                    </div>
-                </form>
-                <a href="/signUp"
-                    >Don't have an account?
-                    <button class="border rounded p-2 bg-slate-200 font-bold">
-                        Register
-                    </button>
-                </a>
-            </div>
-        </div>
-    </body>
+					<!-- Forget Password link -->
+					<div class="mb-4">
+						<a href="/forgotPassword" class="text-blue-500">Forget Password?</a>
+					</div>
+
+					<div>
+						<button
+							type="submit"
+							onclick="return validateForm()"
+							class="bg-blue-500 text-white px-4 py-3 mb-3 rounded font-medium w-64">
+							Login
+						</button>
+					</div>
+				</form>
+				<a href="/signUp"
+					>Don't have an account?
+					<button class="border rounded p-2 bg-slate-200 font-bold">
+						Register
+					</button>
+				</a>
+			</div>
+		</div>
+
+		<script>
+			function validateForm() {
+				console.log("validateForm");
+				let email = document.getElementById("email").value;
+				let password = document.getElementById("password").value;
+				let errorDisplay = document.getElementById("errorDisplay");
+				email = email.trim();
+				password = password.trim();
+
+				if (email == "") {
+					errorDisplay.innerText = "Email must be filled out";
+					event.preventDefault();
+					return false;
+				}
+
+				if (password == "") {
+					errorDisplay.innerText = "Password must be filled out";
+					event.preventDefault();
+					return false;
+				}
+			}
+		</script>
+	</body>
 </html>

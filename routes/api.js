@@ -49,17 +49,17 @@ router
 
 		const { title, price, description, brand, stock, thumbnail } = reqData;
 
-        if (
-            title === "" ||
-            price === "" ||
-            description === "" ||
-            brand === "" ||
-            stock === "" ||
-            thumbnail === ""
-        ) {
-            res.status(400).send("Please fill all the fields");
-            return;
-        }
+		if (
+			title === "" ||
+			price === "" ||
+			description === "" ||
+			brand === "" ||
+			stock === "" ||
+			thumbnail === ""
+		) {
+			res.status(400).send("Please fill all the fields");
+			return;
+		}
 
 		const sql =
 			`INSERT INTO products (title, price, description, brand, stock, thumbnail)` +
@@ -78,12 +78,12 @@ router
 			});
 	})
 	.delete((req, res) => {
-        const { id } = req.body;
+		const { id } = req.body;
 
-        if (id === "") {
-            res.status(400).send("Bad Request");
-            return;
-        }
+		if (id === "") {
+			res.status(400).send("Bad Request");
+			return;
+		}
 		const sql = `DELETE FROM products WHERE id = ${id}`;
 		db(sql)
 			.then((result) => {
@@ -91,6 +91,16 @@ router
 				fs.unlink(`uploads/product/${req.body.thumbnail}`, () => {
 					res.send(result);
 				});
+			})
+			.catch((err) => {
+				console.log(err);
+			});
+
+		// delete this product from cart of all users
+		const sql2 = `DELETE FROM cart WHERE product_id = ${id}`;
+		db(sql2)
+			.then((result) => {
+				console.log(result);
 			})
 			.catch((err) => {
 				console.log(err);

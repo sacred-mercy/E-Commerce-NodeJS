@@ -141,7 +141,7 @@ app
 			"/verifyEmail?token=" +
 			user.emailVerification.verificationCode +
 			'">Verify</a>';
-		// sendEmail(email, subject, textPart, htmlPart);
+		sendEmail(email, subject, textPart, htmlPart);
 	});
 
 app.get("/logout", checkAuth.checkLoggedIn, (req, res) => {
@@ -234,12 +234,12 @@ app
 		await setUser(user);
 		res.redirect("/logout");
 		// send a email to user that password has been changed
-		// sendEmail(
-		//     user.email,
-		//     "Password Changed",
-		//     "You have just changed your Password",
-		//     ""
-		// );
+		sendEmail(
+			user.email,
+			"Password Changed",
+			"You have just changed your Password",
+			""
+		);
 	});
 
 app
@@ -269,7 +269,7 @@ app
 				"/resetPassword?token=" +
 				user.emailVerification.verificationCode +
 				'">Reset Password</a>';
-			// sendEmail(email, subject, textPart, htmlPart);
+			sendEmail(email, subject, textPart, htmlPart);
 		} else {
 			res.render("forgotPassword", {
 				errorMessage: "User does not exist",
@@ -331,12 +331,12 @@ app
 				await setUser(user);
 				res.redirect("/login");
 				// send a email to user that password has been changed
-				// sendEmail(
-				//     user.email,
-				//     "Password Changed",
-				//     "You have just changed your Password",
-				//     ""
-				// );
+				sendEmail(
+					user.email,
+					"Password Changed",
+					"You have just changed your Password",
+					""
+				);
 				return;
 			}
 		}
